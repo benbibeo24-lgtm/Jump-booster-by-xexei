@@ -1,0 +1,65 @@
+-- Tạo ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "JumpBoosterGui"
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+-- Tạo Nút bấm 50x50
+local button = Instance.new("TextButton")
+button.Name = "JumpBoosterButton"
+button.Size = UDim2.new(0, 50, 0, 50)
+button.Position = UDim2.new(0.5, -25, 0.5, -25)
+button.BackgroundColor3 = Color3.fromRGB(0, 100, 255) -- Nền xanh dương
+button.TextColor3 = Color3.new(1, 1, 1) -- Chữ trắng
+button.Text = "JUMP"
+button.Font = Enum.Font.Arcade -- Font Pixel
+button.TextSize = 12
+button.Parent = screenGui
+
+-- Bo tròn & Viền xanh đậm
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(1, 0)
+uiCorner.Parent = button
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(0, 0, 150) -- Xanh đậm
+uiStroke.Thickness = 3
+uiStroke.Parent = button
+
+--- Chức năng di chuyển nút ---
+local dragging, dragInput, dragStart, startPos
+button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = button.Position
+    end
+end)
+button.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+button.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+--- Chức năng Nhảy 500 (Chỉ kích hoạt khi ấn nút) ---
+button.MouseButton1Click:Connect(function()
+    local char = game.Players.LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    
+    if root then
+        -- Đẩy nhân vật lên với lực 500 mà không đổi thuộc tính JumpPower của Humanoid
+        root.AssemblyLinearVelocity = Vector3.new(0, 500, 0)
+    end
+end)
+ 
